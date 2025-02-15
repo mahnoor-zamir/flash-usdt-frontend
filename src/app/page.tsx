@@ -6,6 +6,7 @@ import { http } from "viem";
 import { mainnet, sepolia } from "wagmi/chains";
 import { ConnectButton, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
+import { useRouter } from 'next/navigation';
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -19,6 +20,8 @@ const config = createConfig({
 });
 
 const App = () => {
+  const router = useRouter();
+
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={config}>
@@ -114,7 +117,6 @@ const App = () => {
                 A temporary USDT-like token that appears in wallets, can be transferred, but disappears after a set time.
               </p>
 
-              {/* Call to Action Buttons with Hover Effects */}
               <div className="mt-8 space-x-4">
                 <ConnectButton.Custom>
                   {({
@@ -150,10 +152,10 @@ const App = () => {
                           }
                           return (
                             <button
-                              onClick={openAccountModal}
+                              onClick={() => router.push('/send')}
                               className="relative px-6 py-3 bg-purple-500 text-white rounded-md shadow-lg group overflow-hidden"
                             >
-                              <span className="relative z-10">Wallet Connected</span>
+                              <span className="relative z-10">Send Tokens</span>
                               <span className="absolute inset-0 h-full w-full bg-purple-700 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
                             </button>
                           );
@@ -162,7 +164,7 @@ const App = () => {
                     );
                   }}
                 </ConnectButton.Custom>
-                <button className="relative px-6 py-3 border border-gray-500 text-gray-300 rounded-md group overflow-hidden">
+                <button className=" mt-4 relative px-6 py-3 border border-gray-500 text-gray-300 rounded-md group overflow-hidden">
                   <span className="relative z-10 group-hover:text-white transition-colors duration-300">Learn More</span>
                   <span className="absolute inset-0 h-full w-full bg-gray-700 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
                 </button>
