@@ -12,6 +12,8 @@
     "@ethersproject/providers": "^5.7.2",
     "@rainbow-me/rainbowkit": "^2.2.3",
     "@walletconnect/ethereum-provider": "^2.18.0",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
     "next": "15.1.7",
     "react": "^19.0.0",
