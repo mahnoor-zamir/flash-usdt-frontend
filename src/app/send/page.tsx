@@ -46,6 +46,18 @@ const SendPage = () => {
       // Use the service function directly instead of going through API
       const tx = await sendTransaction(recipient, amount);
       setTxHash(tx.hash);
+      await fetch('/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: address,
+          recipient,
+          amount,
+          txHash: tx.hash,
+        }),
+      });
       setLoadingState("completed");
       setSuccessMessage("Transaction sent successfully!");
     } catch (error) {

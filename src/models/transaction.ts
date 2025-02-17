@@ -1,16 +1,27 @@
 import mongoose from 'mongoose';
 
-const transactionSchema = new mongoose.Schema({
-  from: { type: String, required: true },
-  to: { type: String, required: true },
-  amount: { type: String, required: true },
-  hash: { type: String, required: true, unique: true },
-  timestamp: { type: Date, default: Date.now },
-  status: {
+const TransactionSchema = new mongoose.Schema({
+  sender: {
     type: String,
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending'
-  }
+    required: true,
+  },
+  recipient: {
+    type: String,
+    required: true,
+  },
+  amount: {
+    type: String,
+    required: true,
+  },
+  txHash: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-export default mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);
+export default mongoose.models.Transaction || 
+  mongoose.model('Transaction', TransactionSchema);
