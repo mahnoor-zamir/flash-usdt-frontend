@@ -1,33 +1,77 @@
-import { Wallet, Contract, JsonRpcProvider, parseEther } from 'ethers';
+
+import { Contract, BrowserProvider, parseEther } from 'ethers';
 import * as contractABI from '@/artifacts/contracts/FlashUSDT.json';
-import * as dotenv from 'dotenv';
+import { Signer, Provider } from 'ethers';
+export const getProvider = async () => {
+  try {
+    // Check specifically for MetaMask
+    if (!window.ethereum?.isMetaMask) {
+      throw new Error('Please install MetaMask to use this application');
+    }
 
-dotenv.config();
-
-const rpcUrl = process.env.RPC_URL;
-const privateKey = process.env.PRIVATE_KEY;
-const contractAddress = process.env.CONTRACT_ADDRESS;
-
-if (!rpcUrl || !privateKey || !contractAddress) {
-  throw new Error("Missing environment variables in .env file!");
-}
-
-const provider = new JsonRpcProvider(rpcUrl);
-const wallet = new Wallet(privateKey, provider);
-const contract = new Contract(contractAddress, contractABI.abi, wallet);
-
-export const getOwner = async (): Promise<string> => {
-  return await contract.owner();
+    return new BrowserProvider(window.ethereum);
+  } catch (error) {
+    console.error('Error initializing provider:', error);
+    throw error;
+  }
 };
 
-export const getContractBalance = async (): Promise<string> => {
-  const balance = await contract.balanceOf(wallet.address);
-  return balance.toString();
+
+
+export const getContract = async (signerOrProvider: Signer | Provider) => {
+  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+  if (!contractAddress) {
+    throw new Error('Contract address not found');
+  }
+
+  return new Contract(
+    contractAddress,
+    contractABI.abi,
+    signerOrProvider
+  );
 };
 
-export const sendTransaction = async (recipient: string, amount: string, sender: string, senderPrivateKey: string): Promise<void> => {
-  const senderWallet = new Wallet(senderPrivateKey, provider);
-  const connectedContract = contract.connect(senderWallet);
-  const tx = await connectedContract.transfer(recipient, parseEther(amount));
-  await tx.wait();
+
+
+export const checkExpiration = async (): Promise<boolean> => {
+  try {
+    if (!window.ethereum?.isMetaMask) {
+      throw new Error('Please use MetaMask');
+    }
+
+    const provider = await getProvider();
+    const contract = await getContract(provider);
+    
+    const isExpired = await contract.isExpired();
+    console.log("Contract expiration status:", isExpired);
+    
+    
+    return !isExpired;
+
+  } catch (error) {
+    console.error('Error checking expiration:', error);
+    // Log specific error details
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+    }
+    // Return false on error to prevent transactions
+    return false;
+  }
+};
+export const sendTransaction = async (recipient: string, amount: string) => {
+  try {
+    if (!window.ethereum?.isMetaMask) {
+      throw new Error('Please use MetaMask');
+    }
+    
+    const provider = await getProvider();
+    const signer = await provider.getSigner();
+    const contract = await getContract(signer);
+    
+    const tx = await contract.transfer(recipient, parseEther(amount));
+    return await tx.wait();
+  } catch (error) {
+    console.error('Transaction failed:', error);
+    throw error;
+  }
 };
